@@ -11,7 +11,7 @@ final case class Transaction(
     time: OffsetDateTime
 ) {
 
-  /** * Returns the difference in minutes of two transactions
+  /** * Returns the difference in minutes between two transactions
     * @param other
     * @return
     */

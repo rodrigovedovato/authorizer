@@ -5,23 +5,24 @@ import com.nubank.authorizer.common.Window.errors._
 class Window private (interval: Int, size: Int, items: List[Transaction]) {
   val data: Set[Transaction] = items.toSet
 
+  def copy(interval : Int = this.interval, size : Int = this.size, items : List[Transaction] = this.items): Window = {
+    new Window(interval, size, items)
+  }
+
   def add(transaction: Transaction) : Either[InsertionError, Window] = {
-    items.headOption match {
-      case None => Right(new Window(interval, size, List(transaction)))
-      case Some(latest) =>
-        if (transaction.timeDiff(latest) > interval) {
-          Right(new Window(interval, size, List(transaction)))
-        } else {
-          if (items.length < size) {
-            if (data.contains(transaction)) {
-              Left(DuplicateEntry)
-            } else {
-              Right(new Window(interval, size, transaction +: items))
-            }
-          } else {
-            Left(WindowOverflow)
-          }
-        }
+    val isEmpty: Boolean = items.isEmpty
+    val insideInterval: Boolean = items.nonEmpty && transaction.timeDiff(items.head) <= interval
+    val isDuplicate: Boolean = items.nonEmpty && insideInterval && data.contains(transaction)
+    val overflows : Boolean = items.nonEmpty && insideInterval && items.length == size
+
+    case class Result(isEmpty: Boolean, insideInterval: Boolean, isDuplicate: Boolean, overflows: Boolean)
+
+    Result(isEmpty, insideInterval, isDuplicate, overflows) match {
+      case Result(true, false, false, false) => Right(copy(items = List(transaction)))
+      case Result(false, false, false, false) => Right(copy(items = List(transaction)))
+      case Result(false, true, false, false) => Right(copy(items = transaction :: items))
+      case Result(false, true, true, false) => Left(DuplicateEntry)
+      case Result(false, true, false, true) => Left(WindowOverflow)
     }
   }
 

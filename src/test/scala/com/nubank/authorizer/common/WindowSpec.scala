@@ -48,7 +48,7 @@ class WindowSpec extends AnyWordSpec with EitherValues {
           w1 <- window.add(Transaction(merchant = "The Blue Pub", amount = 20, time = now))
           w2 <- w1.add(Transaction(merchant = "O'Malleys Pub", amount = 100, time = now.plusSeconds(30)))
           w3 <- w2.add(Transaction(merchant = "Deep Bar 611", amount = 100, time = now.plusSeconds(60)))
-          w4 <- w3.add(Transaction(merchant = "Republic Pub", amount = 100, time = now.plusMinutes(3)))
+          w4 <- w3.add(Transaction(merchant = "Republic Pub", amount = 100, time = now.plusMinutes(3))) // More than 2 minutes apart
         } yield w4
 
         assertResult(Window.errors.WindowOverflow)(result.left.value)
@@ -68,7 +68,7 @@ class WindowSpec extends AnyWordSpec with EitherValues {
         val result = for {
           w1 <- window.add(Transaction(merchant = "The Blue Pub", amount = 20, time = now))
           w2 <- w1.add(Transaction(merchant = "O'Malleys Pub", amount = 100, time = now.plusSeconds(30)))
-          w3 <- w2.add(Transaction(merchant = "O'Malleys Pub", amount = 100, time = now.plusMinutes(3)))
+          w3 <- w2.add(Transaction(merchant = "O'Malleys Pub", amount = 100, time = now.plusMinutes(3))) // More than 2 minutes apart
         } yield w3
 
         assertResult(Window.errors.DuplicateEntry)(result.left.value)
