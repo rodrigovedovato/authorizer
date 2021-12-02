@@ -1,5 +1,6 @@
 package com.nubank.authorizer
 
+import com.nubank.authorizer.AccountState.AccountAlreadyInitialized
 import com.nubank.authorizer.Authorizer.messages.{AuthorizerMessage, CreateAccountRequest}
 
 class Authorizer {
@@ -10,10 +11,15 @@ class Authorizer {
   }
 
   def createAccount(accountState: AccountState, accountRequest: CreateAccountRequest) : AccountState = {
-    AccountState(
-      account = Account.create(accountRequest.activeCard, accountRequest.availableLimit),
-      violations = List.empty
-    )
+    if (accountState.initialized) {
+      accountState.copy(violations = accountState.violations :+ AccountAlreadyInitialized)
+    } else {
+      AccountState(
+        initialized = true,
+        account = Account.create(accountRequest.activeCard, accountRequest.availableLimit),
+        violations = List.empty
+      )
+    }
   }
 }
 
