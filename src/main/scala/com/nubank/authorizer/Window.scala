@@ -1,6 +1,6 @@
-package com.nubank.authorizer.common
+package com.nubank.authorizer
 
-import com.nubank.authorizer.common.Window.errors._
+import com.nubank.authorizer.Window.errors.{InsertionError, DuplicateEntry, WindowOverflow}
 
 class Window private (interval: Int, size: Int, items: List[Transaction]) {
   val data: Set[Transaction] = items.toSet
@@ -10,14 +10,13 @@ class Window private (interval: Int, size: Int, items: List[Transaction]) {
   }
 
   def add(transaction: Transaction) : Either[InsertionError, Window] = {
-    val isEmpty: Boolean = items.isEmpty
-    val insideInterval: Boolean = items.nonEmpty && transaction.timeDiff(items.head) <= interval
-    val isDuplicate: Boolean = items.nonEmpty && insideInterval && data.contains(transaction)
-    val overflows : Boolean = items.nonEmpty && insideInterval && items.length == size
+    val insideInterval = items.nonEmpty && transaction.timeDiff(items.head) <= interval
+    val isDuplicate = items.nonEmpty && insideInterval && data.contains(transaction)
+    val overflows  = items.nonEmpty && insideInterval && items.length == size
 
     case class Result(isEmpty: Boolean, insideInterval: Boolean, isDuplicate: Boolean, overflows: Boolean)
 
-    Result(isEmpty, insideInterval, isDuplicate, overflows) match {
+    Result(items.isEmpty, insideInterval, isDuplicate, overflows) match {
       case Result(true, false, false, false) => Right(copy(items = List(transaction)))
       case Result(false, false, false, false) => Right(copy(items = List(transaction)))
       case Result(false, true, false, false) => Right(copy(items = transaction :: items))

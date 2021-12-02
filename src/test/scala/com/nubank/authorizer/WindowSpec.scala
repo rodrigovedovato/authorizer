@@ -1,4 +1,4 @@
-package com.nubank.authorizer.common
+package com.nubank.authorizer
 
 import org.scalatest.EitherValues
 import org.scalatest.wordspec.AnyWordSpec
@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 class WindowSpec extends AnyWordSpec with EitherValues {
   val now: OffsetDateTime = OffsetDateTime.now()
 
-  "A Window" when {
+  "A window" when {
     val window = Window(interval = 2, size = 3)
 
     "initialized" should {

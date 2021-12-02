@@ -1,4 +1,4 @@
-package com.nubank.authorizer.common
+package com.nubank.authorizer
 
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
