@@ -1,10 +1,9 @@
 package com.nubank.authorizer
 
-case class Account private (activeCard: Boolean, availableLimit: Int)
+class Account private (val activeCard: Boolean, val availableLimit: Int)
 
 object Account {
-  def empty(): Account = Account(activeCard = false, 0)
+  def empty(): Account = new Account(activeCard = false, availableLimit = 0)
 
-  def active(availableLimit: Int): Account = Account(activeCard = true, availableLimit)
-  def inactive(availableLimit: Int): Account = Account(activeCard = false, availableLimit)
+  def create(activeCard: Boolean, availableLimit: Int): Account = new Account(activeCard, availableLimit)
 }

@@ -1,6 +1,6 @@
 package com.nubank.authorizer
 
-import com.nubank.authorizer.Authorizer.Authorization
+import com.nubank.authorizer.Authorizer.messages.CreateAccountRequest
 import org.scalatest.wordspec.AnyWordSpec
 
 class AuthorizerSpec extends AnyWordSpec {
@@ -9,11 +9,14 @@ class AuthorizerSpec extends AnyWordSpec {
 
     "asked to create a new account" should {
       "return it" in {
-        val authorization = authorizer.send(CreateAccountRequest(activeCard = true, availableLimit = 5))
+        val accountState = authorizer.send(
+          state = AccountState.empty(),
+          message = CreateAccountRequest(activeCard = true, availableLimit = 5)
+        )
 
-        assert(authorization.account.activeCard)
-        assertResult(5)(authorization.account.availableLimit)
-        assertResult(0)(authorization.violations.length)
+        assert(accountState.account.activeCard)
+        assertResult(5)(accountState.account.availableLimit)
+        assertResult(0)(accountState.violations.length)
       }
     }
   }
