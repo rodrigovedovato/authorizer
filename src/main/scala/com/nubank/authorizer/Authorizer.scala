@@ -13,17 +13,16 @@ class Authorizer {
 
   def processTransaction(state: AccountState, ptm: ProcessTransactionMessage): AccountState = {
     state.copy(
-      account = state.account.subtract(ptm.transaction.amount)
+      account = state.account.map(_.subtract(ptm.transaction.amount))
     )
   }
 
   def createAccount(accountState: AccountState, accountRequest: CreateAccountMessage) : AccountState = {
-    if (accountState.initialized) {
+    if (accountState.account.isDefined) {
       accountState.copy(violations = accountState.violations :+ AccountAlreadyInitialized)
     } else {
       AccountState(
-        initialized = true,
-        account = Account.create(accountRequest.activeCard, accountRequest.availableLimit),
+        account = Some(Account.create(accountRequest.activeCard, accountRequest.availableLimit)),
         violations = List.empty
       )
     }
