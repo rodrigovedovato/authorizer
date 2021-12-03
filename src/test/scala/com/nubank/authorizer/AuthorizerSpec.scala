@@ -36,24 +36,8 @@ class AuthorizerSpec extends AnyWordSpec {
         assert(after.account.get.availableLimit == 80)
         assert(after.violations.isEmpty)
       }
-      "violate the account-not-initialized rule" in {
-        val before = AccountState.empty()
-        val after = subject.send(before, ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now())))
+      "not remove the amount from the limit when there is a violation" in {
 
-        assert(after.account.isEmpty)
-        assert(after.violations == List(AccountNotInitialized))
-      }
-      "violate the card-not-active rule" in {
-        assert(false)
-      }
-      "violate the insufficient-limit rule" in {
-        assert(false)
-      }
-      "violate the frequency-small-interval rule" in {
-        assert(false)
-      }
-      "violate the double-transaction rule" in {
-        assert(false)
       }
     }
   }
