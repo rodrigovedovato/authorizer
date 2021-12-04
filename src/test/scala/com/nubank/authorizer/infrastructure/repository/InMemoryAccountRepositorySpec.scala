@@ -1,6 +1,7 @@
-package com.nubank.authorizer.repository
+package com.nubank.authorizer.infrastructure.repository
 
-import com.nubank.authorizer.Account
+import com.nubank.authorizer.domain.model.Account
+import com.nubank.authorizer.infrastructure.InMemoryAccountRepository
 import org.scalatest.EitherValues
 import org.scalatest.wordspec.AnyWordSpec
 

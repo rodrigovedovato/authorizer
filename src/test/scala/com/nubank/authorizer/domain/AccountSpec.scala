@@ -1,5 +1,6 @@
-package com.nubank.authorizer
+package com.nubank.authorizer.domain
 
+import com.nubank.authorizer.domain.model.Account
 import org.scalatest.wordspec.AnyWordSpec
 
 class AccountSpec extends AnyWordSpec {

@@ -1,8 +1,9 @@
-package com.nubank.authorizer.rules
+package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.Authorization.{DoubleTransaction, HighFrequencySmallInterval}
-import com.nubank.authorizer.{Account, Authorization, Transaction}
-import com.nubank.authorizer.Authorizer.messages.ProcessTransactionMessage
+import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
+import com.nubank.authorizer.domain.model
+import com.nubank.authorizer.domain.model.Authorization.{DoubleTransaction, HighFrequencySmallInterval}
+import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.OffsetDateTime
@@ -26,7 +27,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state2: Authorization = rule.check(
         authorization = auth1,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "O'Malleys Pub",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(30)
@@ -37,7 +38,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state3: Authorization = rule.check(
         authorization = state2,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Deep Bar 611",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(45)
@@ -48,7 +49,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state4: Authorization = rule.check(
         authorization = state3,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Republic Pub",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(55)
@@ -62,7 +63,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state1: Authorization = rule.check(
         authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now()
@@ -73,7 +74,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state2: Authorization = rule.check(
         authorization = state1,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "O'Malleys Pub",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(30)
@@ -84,7 +85,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state3: Authorization = rule.check(
         authorization = state2,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Deep Bar 611",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(45)
@@ -95,7 +96,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state4: Authorization = rule.check(
         authorization = state3,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Republic Pub",
             amount = 20,
             time = OffsetDateTime.now().plusMinutes(5)
@@ -112,7 +113,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state1: Authorization = rule.check(
         authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now()
@@ -123,7 +124,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state2: Authorization = rule.check(
         authorization = state1,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(30)
@@ -137,7 +138,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state1: Authorization = rule.check(
         authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now()
@@ -148,7 +149,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state2: Authorization = rule.check(
         authorization = state1,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now().plusMinutes(5)
@@ -165,7 +166,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state1: Authorization = rule.check(
         authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "The Blue Pub",
             amount = 20,
             time = OffsetDateTime.now()
@@ -176,7 +177,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state2: Authorization = rule.check(
         authorization = state1,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Bar do Moe",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(30)
@@ -187,7 +188,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state3: Authorization = rule.check(
         authorization = state2,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Valadares",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(45)
@@ -198,7 +199,7 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       val state4: Authorization = rule.check(
         authorization = state3,
         ptm = ProcessTransactionMessage(
-          Transaction(
+          model.Transaction(
             merchant = "Valadares",
             amount = 20,
             time = OffsetDateTime.now().plusSeconds(60)

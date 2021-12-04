@@ -1,6 +1,6 @@
-package com.nubank.authorizer
+package com.nubank.authorizer.domain.model
 
-import com.nubank.authorizer.Authorization.Violation
+import com.nubank.authorizer.domain.model.Authorization.Violation
 
 final case class Authorization(account: Account, violations: List[Violation])
 

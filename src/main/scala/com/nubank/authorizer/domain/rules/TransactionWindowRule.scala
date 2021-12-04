@@ -1,8 +1,9 @@
-package com.nubank.authorizer.rules
-import com.nubank.authorizer.Authorization
-import com.nubank.authorizer.Authorization.{DoubleTransaction, HighFrequencySmallInterval, Violation}
-import com.nubank.authorizer.Authorizer.messages
-import com.nubank.authorizer.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
+package com.nubank.authorizer.domain.rules
+
+import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
+import com.nubank.authorizer.domain.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
+import com.nubank.authorizer.domain.model.Authorization
+import com.nubank.authorizer.domain.model.Authorization.{DoubleTransaction, HighFrequencySmallInterval, Violation}
 
 class TransactionWindowRule extends BaseRule {
   private val errorToViolation: InsertionError => List[Violation] = {
@@ -11,7 +12,7 @@ class TransactionWindowRule extends BaseRule {
     case DuplicateAndOverflow => List(HighFrequencySmallInterval, DoubleTransaction)
   }
 
-  override def check(authorization: Authorization, ptm: messages.ProcessTransactionMessage): Authorization = {
+  override def check(authorization: Authorization, ptm: ProcessTransactionMessage): Authorization = {
     authorization
       .account
       .addTransaction(ptm.transaction)

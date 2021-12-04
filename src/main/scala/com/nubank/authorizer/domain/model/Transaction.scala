@@ -1,4 +1,4 @@
-package com.nubank.authorizer
+package com.nubank.authorizer.domain.model
 
 import org.apache.commons.lang3.builder.HashCodeBuilder
 

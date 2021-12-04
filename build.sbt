@@ -9,6 +9,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "authorizer",
     libraryDependencies ++= Seq(
+        "io.circe" %% "circe-core" % "0.14.1",
+        "io.circe" %% "circe-generic" % "0.14.1",
+        "io.circe" %% "circe-generic-extras" % "0.14.1",
         "org.apache.commons" % "commons-lang3" % "3.12.0",
         scalaTest % Test
     )

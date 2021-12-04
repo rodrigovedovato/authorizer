@@ -1,8 +1,9 @@
-package com.nubank.authorizer.rules
+package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.Authorization.{DoubleTransaction, InsufficientLimit}
-import com.nubank.authorizer.Authorizer.messages.ProcessTransactionMessage
-import com.nubank.authorizer.{Account, Authorization, Transaction}
+import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
+import com.nubank.authorizer.domain.model
+import com.nubank.authorizer.domain.model.Authorization.{DoubleTransaction, InsufficientLimit}
+import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.OffsetDateTime
@@ -20,7 +21,7 @@ class RuleEngineSpec extends AnyWordSpec {
           case Right(value) => {
             val authorization = Authorization(value, List.empty)
             val validated = RuleEngine.execute(authorization, ProcessTransactionMessage(
-              Transaction(merchant = "McDonald's", amount = 10, time = OffsetDateTime.now())
+              model.Transaction(merchant = "McDonald's", amount = 10, time = OffsetDateTime.now())
             ))
 
             assert(validated.violations == List(InsufficientLimit, DoubleTransaction))

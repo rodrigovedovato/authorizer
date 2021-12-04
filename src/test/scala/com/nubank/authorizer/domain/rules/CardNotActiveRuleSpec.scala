@@ -1,8 +1,9 @@
-package com.nubank.authorizer.rules
+package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.Authorization.CardNotActive
-import com.nubank.authorizer.Authorizer.messages.ProcessTransactionMessage
-import com.nubank.authorizer.{Account, Authorization, Transaction}
+import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
+import com.nubank.authorizer.domain.model
+import com.nubank.authorizer.domain.model.Authorization.CardNotActive
+import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.OffsetDateTime
@@ -22,7 +23,7 @@ class CardNotActiveRuleSpec extends AnyWordSpec {
     "not be triggered" in {
       val result = rule.check(
         authorization = Authorization(Account.create(true, 1000), List.empty),
-        ptm = ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now()))
+        ptm = ProcessTransactionMessage(model.Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now()))
       )
 
       assert(result.violations.isEmpty)

@@ -1,14 +1,15 @@
-package com.nubank.authorizer
+package com.nubank.authorizer.domain
 
-import com.nubank.authorizer.Authorization.AccountNotInitialized
-import com.nubank.authorizer.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.LanguageExtensions.EitherExtensions
-import com.nubank.authorizer.rules.RuleEngine
-import com.nubank.authorizer.repository.AccountRepository
+import com.nubank.authorizer.domain.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
+import com.nubank.authorizer.domain.model.Authorization.AccountNotInitialized
+import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
+import com.nubank.authorizer.domain.repository.AccountRepository
+import com.nubank.authorizer.domain.rules.RuleEngine
 
 class Authorizer(repository: AccountRepository) {
   def authorize(ptm: ProcessTransactionMessage): Authorization = {
-    val authorization = repository.get.map(account => Authorization(account, List.empty)).map { auth =>
+    val authorization = repository.get.map(account => model.Authorization(account, List.empty)).map { auth =>
       val validated = RuleEngine.execute(auth, ptm)
 
       if (validated.violations.isEmpty) {

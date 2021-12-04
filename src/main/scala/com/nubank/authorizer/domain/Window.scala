@@ -1,6 +1,7 @@
-package com.nubank.authorizer
+package com.nubank.authorizer.domain
 
-import com.nubank.authorizer.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
+import com.nubank.authorizer.domain.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
+import com.nubank.authorizer.domain.model.Transaction
 
 class Window private (interval: Int, size: Int, items: List[Transaction]) {
   val data: Set[Transaction] = items.toSet
