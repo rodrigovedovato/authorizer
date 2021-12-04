@@ -2,13 +2,31 @@ package com.nubank.authorizer
 
 import com.nubank.authorizer.Authorization.{AccountAlreadyInitialized, AccountNotInitialized}
 import com.nubank.authorizer.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
-import com.nubank.authorizer.repository.AccountRepository
+import com.nubank.authorizer.repository.{AccountRepository, InMemoryAccountRepository}
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.OffsetDateTime
 
 class AuthorizerSpec extends AnyWordSpec {
   "The authorizer" when {
+    "asked to create an account" should {
+      "create it" in {
+        val subject = new Authorizer(new InMemoryAccountRepository())
+        val caa = subject.createAccount(CreateAccountMessage(true, 100))
+
+        assert(caa.violations.isEmpty)
+        assert(caa.account.activeCard)
+        assertResult(100)(caa.account.availableLimit)
+      }
+      "return a account-already-initialized violation" in {
+        val subject = new Authorizer(new InMemoryAccountRepository())
+
+        subject.createAccount(CreateAccountMessage(true, 100))
+        val caa = subject.createAccount(CreateAccountMessage(true, 50))
+
+        assert(caa.violations == List(AccountAlreadyInitialized))
+      }
+    }
     "asked to process a transaction" should {
       "return a account-not-initialized violation" in {
         val subject = new Authorizer(new AccountRepository {
