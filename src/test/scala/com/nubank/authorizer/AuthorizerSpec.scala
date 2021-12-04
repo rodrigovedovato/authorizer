@@ -37,7 +37,11 @@ class AuthorizerSpec extends AnyWordSpec {
         assert(after.violations.isEmpty)
       }
       "not remove the amount from the limit when there is a violation" in {
+        val before = subject.send(AccountState.empty(), CreateAccountMessage(activeCard = true, availableLimit = 100))
+        val after = subject.send(before, ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 200, time = OffsetDateTime.now())))
 
+        assert(after.account.get.availableLimit == 100)
+        assert(after.violations.size == 1)
       }
     }
   }

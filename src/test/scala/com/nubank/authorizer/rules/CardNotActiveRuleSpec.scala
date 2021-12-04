@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 
 class CardNotActiveRuleSpec extends AnyWordSpec {
   "The card-not-active rule" should {
-    val rule = new CardNotActiveRule(Option.empty)
+    val rule = new CardNotActiveRule()
 
     "be triggered" in {
       val result = rule.check(

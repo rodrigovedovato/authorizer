@@ -1,6 +1,6 @@
 package com.nubank.authorizer
 
-import com.nubank.authorizer.Window.errors.{InsertionError, DuplicateEntry, WindowOverflow}
+import com.nubank.authorizer.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
 
 class Window private (interval: Int, size: Int, items: List[Transaction]) {
   val data: Set[Transaction] = items.toSet
@@ -22,6 +22,7 @@ class Window private (interval: Int, size: Int, items: List[Transaction]) {
       case Result(false, true, false, false) => Right(copy(items = transaction :: items))
       case Result(false, true, true, false) => Left(DuplicateEntry)
       case Result(false, true, false, true) => Left(WindowOverflow)
+      case Result(false, true, true, true) => Left(DuplicateAndOverflow)
     }
   }
 
@@ -33,6 +34,7 @@ object Window {
     sealed trait InsertionError
     case object DuplicateEntry extends InsertionError
     case object WindowOverflow extends InsertionError
+    case object DuplicateAndOverflow extends InsertionError
   }
 
   def apply(interval: Int, size: Int) = new Window(interval, size, List.empty)

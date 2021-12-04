@@ -2,6 +2,7 @@ package com.nubank.authorizer
 
 import com.nubank.authorizer.AccountState.AccountAlreadyInitialized
 import com.nubank.authorizer.Authorizer.messages.{AuthorizerMessage, CreateAccountMessage, ProcessTransactionMessage}
+import com.nubank.authorizer.rules.RuleEngine
 
 class Authorizer {
   def send(state: AccountState, message: AuthorizerMessage) : AccountState = {
@@ -12,9 +13,15 @@ class Authorizer {
   }
 
   def processTransaction(state: AccountState, ptm: ProcessTransactionMessage): AccountState = {
-    state.copy(
-      account = state.account.map(_.subtract(ptm.transaction.amount))
-    )
+    val validated = RuleEngine.execute(state, ptm)
+
+    if (validated.violations.isEmpty) {
+      validated.copy(
+        account = validated.account.map(_.subtract(ptm.transaction.amount))
+      )
+    } else {
+      validated
+    }
   }
 
   def createAccount(accountState: AccountState, accountRequest: CreateAccountMessage) : AccountState = {
