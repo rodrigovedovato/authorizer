@@ -73,6 +73,17 @@ class WindowSpec extends AnyWordSpec with EitherValues {
 
         assertResult(Window.errors.DuplicateEntry)(result.left.value)
       }
+
+      "warn this is a duplicate and overflow transaction" in {
+        val result = for {
+          w1 <- window.add(Transaction(merchant = "The Blue Pub", amount = 20, time = now))
+          w2 <- w1.add(Transaction(merchant = "O'Malleys Pub", amount = 100, time = now.plusSeconds(30)))
+          w3 <- w2.add(Transaction(merchant = "Bar do Moe", amount = 100, time = now.plusSeconds(60)))
+          w4 <- w3.add(Transaction(merchant = "Bar do Moe", amount = 100, time = now.plusSeconds(65)))
+        } yield w4
+
+        assertResult(Window.errors.DuplicateAndOverflow)(result.left.value)
+      }
     }
   }
 }

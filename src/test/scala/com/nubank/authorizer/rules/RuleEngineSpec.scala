@@ -1,7 +1,7 @@
 package com.nubank.authorizer.rules
 
-import com.nubank.authorizer.AccountState.{DoubleTransaction, HighFrequencySmallInterval, InsufficientLimit}
-import com.nubank.authorizer.{AccountState, Authorizer, Transaction}
+import com.nubank.authorizer.Authorization.{DoubleTransaction, HighFrequencySmallInterval, InsufficientLimit}
+import com.nubank.authorizer.{Authorization, Authorizer, Transaction}
 import com.nubank.authorizer.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -13,20 +13,15 @@ class RuleEngineSpec extends AnyWordSpec {
 
     "that violates multiple rules" should {
       "accumulate all of them" in {
-        val before = subject.send(
-          AccountState.empty(),
-          CreateAccountMessage(activeCard = true, availableLimit = 100)
-        )
+        val before = subject.createAccount(CreateAccountMessage(activeCard = true, availableLimit = 100))
 
-        val state1 = subject.send(
-          before,
+        subject.authorize(
           ProcessTransactionMessage(
             Transaction(merchant = "McDonald's", amount = 10, time = OffsetDateTime.now())
           )
         )
 
-        val state2 = subject.send(
-          state1,
+        subject.authorize(
           ProcessTransactionMessage(
             Transaction(
               merchant = "Burger King",
@@ -36,8 +31,7 @@ class RuleEngineSpec extends AnyWordSpec {
           )
         )
 
-        val state3 = subject.send(
-          state2,
+        subject.authorize(
           ProcessTransactionMessage(
             Transaction(
               merchant = "Burger King",
@@ -47,8 +41,7 @@ class RuleEngineSpec extends AnyWordSpec {
           )
         )
 
-        val state4 = subject.send(
-          state3,
+        val after = subject.authorize(
           ProcessTransactionMessage(
             Transaction(
               merchant = "Lanchonete da Cidade",
@@ -58,7 +51,7 @@ class RuleEngineSpec extends AnyWordSpec {
           )
         )
 
-        assert(state4.violations == List(InsufficientLimit, HighFrequencySmallInterval))
+        assert(after.violations == List(InsufficientLimit, HighFrequencySmallInterval))
       }
     }
   }

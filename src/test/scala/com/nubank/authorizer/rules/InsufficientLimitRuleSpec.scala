@@ -1,8 +1,8 @@
 package com.nubank.authorizer.rules
 
-import com.nubank.authorizer.AccountState.InsufficientLimit
+import com.nubank.authorizer.Authorization.InsufficientLimit
 import com.nubank.authorizer.Authorizer.messages.ProcessTransactionMessage
-import com.nubank.authorizer.{Account, AccountState, Transaction}
+import com.nubank.authorizer.{Account, Authorization, Transaction}
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.time.OffsetDateTime
@@ -13,7 +13,7 @@ class InsufficientLimitRuleSpec extends AnyWordSpec {
 
     "be triggered" in {
       val result = rule.check(
-        state = AccountState(Some(Account.create(true, 50)), List.empty),
+        authorization = Authorization(Account.create(true, 50), List.empty),
         ptm = ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 100, time = OffsetDateTime.now()))
       )
 
@@ -21,7 +21,7 @@ class InsufficientLimitRuleSpec extends AnyWordSpec {
     }
     "not be triggered" in {
       val result = rule.check(
-        state = AccountState(Some(Account.create(true, 1000)), List.empty),
+        authorization = Authorization(Account.create(true, 1000), List.empty),
         ptm = ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now()))
       )
 

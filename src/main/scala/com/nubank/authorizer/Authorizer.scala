@@ -1,37 +1,36 @@
 package com.nubank.authorizer
 
-import com.nubank.authorizer.AccountState.AccountAlreadyInitialized
+import com.nubank.authorizer.Authorization.{AccountAlreadyInitialized, AccountNotInitialized}
 import com.nubank.authorizer.Authorizer.messages.{AuthorizerMessage, CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.rules.RuleEngine
 
+import scala.util.chaining.scalaUtilChainingOps
+
 class Authorizer {
-  def send(state: AccountState, message: AuthorizerMessage) : AccountState = {
-    message match {
-      case cam: CreateAccountMessage => createAccount(state, cam)
-      case ptm: ProcessTransactionMessage => processTransaction(state, ptm)
-    }
+  var account: Option[Account] = Option.empty
+
+  def authorize(ptm: ProcessTransactionMessage): Authorization = {
+    account.fold(Authorization(null, List(AccountNotInitialized))) { a =>
+      val authorization = Authorization(a, List.empty)
+      val validated = RuleEngine.execute(authorization, ptm)
+
+      if (validated.violations.isEmpty) {
+        validated.copy(
+          account = validated.account.subtract(ptm.transaction.amount)
+        )
+      } else {
+        validated
+      }
+    }.tap(a => account = Some(a.account))
   }
 
-  def processTransaction(state: AccountState, ptm: ProcessTransactionMessage): AccountState = {
-    val validated = RuleEngine.execute(state, ptm)
-
-    if (validated.violations.isEmpty) {
-      validated.copy(
-        account = validated.account.map(_.subtract(ptm.transaction.amount))
-      )
+  def createAccount(accountRequest: CreateAccountMessage) : Authorization = {
+    if (account.isEmpty) {
+      val auth = Authorization.newAccount(accountRequest)
+      account = Some(auth.account)
+      auth
     } else {
-      validated
-    }
-  }
-
-  def createAccount(accountState: AccountState, accountRequest: CreateAccountMessage) : AccountState = {
-    if (accountState.account.isDefined) {
-      accountState.copy(violations = accountState.violations :+ AccountAlreadyInitialized)
-    } else {
-      AccountState(
-        account = Some(Account.create(accountRequest.activeCard, accountRequest.availableLimit)),
-        violations = List.empty
-      )
+      Authorization.alreadyInitialized(account.get)
     }
   }
 }

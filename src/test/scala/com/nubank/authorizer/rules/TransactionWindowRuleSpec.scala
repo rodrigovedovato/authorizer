@@ -1,7 +1,7 @@
 package com.nubank.authorizer.rules
 
-import com.nubank.authorizer.AccountState.{DoubleTransaction, HighFrequencySmallInterval}
-import com.nubank.authorizer.{Account, AccountState, Transaction}
+import com.nubank.authorizer.Authorization.{DoubleTransaction, HighFrequencySmallInterval}
+import com.nubank.authorizer.{Account, Authorization, Transaction}
 import com.nubank.authorizer.Authorizer.messages.ProcessTransactionMessage
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -12,8 +12,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
 
   "The high-frequency-small-interval rule" should {
     "be triggered" in {
-      val state1: AccountState = rule.check(
-        state = AccountState(Some(Account.create(true, 10000)), List.empty),
+      val auth1: Authorization = rule.check(
+        authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -23,8 +23,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state2: AccountState = rule.check(
-        state = state1,
+      val state2: Authorization = rule.check(
+        authorization = auth1,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "O'Malleys Pub",
@@ -34,8 +34,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state3: AccountState = rule.check(
-        state = state2,
+      val state3: Authorization = rule.check(
+        authorization = state2,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "Deep Bar 611",
@@ -45,8 +45,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state4: AccountState = rule.check(
-        state = state3,
+      val state4: Authorization = rule.check(
+        authorization = state3,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "Republic Pub",
@@ -59,8 +59,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       assert(state4.violations.last == HighFrequencySmallInterval)
     }
     "not be triggered" in {
-      val state1: AccountState = rule.check(
-        state = AccountState(Some(Account.create(true, 10000)), List.empty),
+      val state1: Authorization = rule.check(
+        authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -70,8 +70,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state2: AccountState = rule.check(
-        state = state1,
+      val state2: Authorization = rule.check(
+        authorization = state1,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "O'Malleys Pub",
@@ -81,8 +81,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state3: AccountState = rule.check(
-        state = state2,
+      val state3: Authorization = rule.check(
+        authorization = state2,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "Deep Bar 611",
@@ -92,8 +92,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state4: AccountState = rule.check(
-        state = state3,
+      val state4: Authorization = rule.check(
+        authorization = state3,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "Republic Pub",
@@ -109,8 +109,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
 
   "The double-transaction rule" should {
     "be triggered" in {
-      val state1: AccountState = rule.check(
-        state = AccountState(Some(Account.create(true, 10000)), List.empty),
+      val state1: Authorization = rule.check(
+        authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -120,8 +120,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state2: AccountState = rule.check(
-        state = state1,
+      val state2: Authorization = rule.check(
+        authorization = state1,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -134,8 +134,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       assert(state2.violations.last == DoubleTransaction)
     }
     "not be triggered" in {
-      val state1: AccountState = rule.check(
-        state = AccountState(Some(Account.create(true, 10000)), List.empty),
+      val state1: Authorization = rule.check(
+        authorization = Authorization(Account.create(true, 10000), List.empty),
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -145,8 +145,8 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
         )
       )
 
-      val state2: AccountState = rule.check(
-        state = state1,
+      val state2: Authorization = rule.check(
+        authorization = state1,
         ptm = ProcessTransactionMessage(
           Transaction(
             merchant = "The Blue Pub",
@@ -157,6 +157,56 @@ class TransactionWindowRuleSpec extends AnyWordSpec {
       )
 
       assert(state2.violations.isEmpty)
+    }
+  }
+
+  "Both double-transaction and high-frequency rules" should {
+    "be triggered" in {
+      val state1: Authorization = rule.check(
+        authorization = Authorization(Account.create(true, 10000), List.empty),
+        ptm = ProcessTransactionMessage(
+          Transaction(
+            merchant = "The Blue Pub",
+            amount = 20,
+            time = OffsetDateTime.now()
+          )
+        )
+      )
+
+      val state2: Authorization = rule.check(
+        authorization = state1,
+        ptm = ProcessTransactionMessage(
+          Transaction(
+            merchant = "Bar do Moe",
+            amount = 20,
+            time = OffsetDateTime.now().plusSeconds(30)
+          )
+        )
+      )
+
+      val state3: Authorization = rule.check(
+        authorization = state2,
+        ptm = ProcessTransactionMessage(
+          Transaction(
+            merchant = "Valadares",
+            amount = 20,
+            time = OffsetDateTime.now().plusSeconds(45)
+          )
+        )
+      )
+
+      val state4: Authorization = rule.check(
+        authorization = state3,
+        ptm = ProcessTransactionMessage(
+          Transaction(
+            merchant = "Valadares",
+            amount = 20,
+            time = OffsetDateTime.now().plusSeconds(60)
+          )
+        )
+      )
+
+      assert(state4.violations == List(HighFrequencySmallInterval, DoubleTransaction))
     }
   }
 }
