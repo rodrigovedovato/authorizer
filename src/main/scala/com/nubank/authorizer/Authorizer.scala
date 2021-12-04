@@ -1,18 +1,15 @@
 package com.nubank.authorizer
 
-import com.nubank.authorizer.Authorization.{AccountAlreadyInitialized, AccountNotInitialized}
-import com.nubank.authorizer.Authorizer.messages.{AuthorizerMessage, CreateAccountMessage, ProcessTransactionMessage}
+import com.nubank.authorizer.Authorization.AccountNotInitialized
+import com.nubank.authorizer.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
+import com.nubank.authorizer.LanguageExtensions.EitherExtensions
 import com.nubank.authorizer.rules.RuleEngine
+import com.nubank.authorizer.repository.AccountRepository
 
-import scala.util.chaining.scalaUtilChainingOps
-
-class Authorizer {
-  var account: Option[Account] = Option.empty
-
+class Authorizer(repository: AccountRepository) {
   def authorize(ptm: ProcessTransactionMessage): Authorization = {
-    account.fold(Authorization(null, List(AccountNotInitialized))) { a =>
-      val authorization = Authorization(a, List.empty)
-      val validated = RuleEngine.execute(authorization, ptm)
+    val authorization = repository.get.map(account => Authorization(account, List.empty)).map { auth =>
+      val validated = RuleEngine.execute(auth, ptm)
 
       if (validated.violations.isEmpty) {
         validated.copy(
@@ -21,17 +18,18 @@ class Authorizer {
       } else {
         validated
       }
-    }.tap(a => account = Some(a.account))
+    }
+
+    authorization.getOrElse(Authorization(null, List(AccountNotInitialized)))
   }
 
   def createAccount(accountRequest: CreateAccountMessage) : Authorization = {
-    if (account.isEmpty) {
-      val auth = Authorization.newAccount(accountRequest)
-      account = Some(auth.account)
-      auth
-    } else {
-      Authorization.alreadyInitialized(account.get)
-    }
+    val account = Account.create(accountRequest.activeCard, accountRequest.availableLimit)
+
+    repository
+      .save(account)
+      .leftMap(_.currentAccount)
+      .fold(Authorization.alreadyInitialized, Authorization.newAccount)
   }
 }
 
