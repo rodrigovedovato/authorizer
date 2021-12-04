@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 
 class InsufficientLimitRuleSpec extends AnyWordSpec {
   "The card-not-active rule" should {
-    val rule = new InsufficientLimitRule()
+    val rule = new InsufficientLimitRule(Option.empty)
 
     "be triggered" in {
       val result = rule.check(

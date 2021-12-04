@@ -8,7 +8,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import java.time.OffsetDateTime
 
 class TransactionWindowRuleSpec extends AnyWordSpec {
-  val rule = new TransactionWindowRule()
+  val rule = new TransactionWindowRule(Option.empty)
 
   "The high-frequency-small-interval rule" should {
     "be triggered" in {

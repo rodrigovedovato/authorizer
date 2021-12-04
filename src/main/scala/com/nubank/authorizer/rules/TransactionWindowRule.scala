@@ -4,7 +4,7 @@ import com.nubank.authorizer.AccountState.{DoubleTransaction, HighFrequencySmall
 import com.nubank.authorizer.Authorizer.messages
 import com.nubank.authorizer.Window.errors.{DuplicateEntry, InsertionError, WindowOverflow}
 
-class TransactionWindowRule extends BaseRule(Option.empty) {
+class TransactionWindowRule(val nextRule: Option[BaseRule]) extends BaseRule(nextRule) {
   private val errorToViolation: InsertionError => Violation = {
     case WindowOverflow => HighFrequencySmallInterval
     case DuplicateEntry => DoubleTransaction

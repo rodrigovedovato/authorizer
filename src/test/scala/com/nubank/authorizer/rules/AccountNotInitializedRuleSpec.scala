@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 
 class AccountNotInitializedRuleSpec extends AnyWordSpec {
   "The account-not-initialized rule" should {
-    val rule = new AccountNotInitializedRule()
+    val rule = new AccountNotInitializedRule(Option.empty)
 
     "be triggered" in {
       val result : AccountState = rule.check(
@@ -20,8 +20,6 @@ class AccountNotInitializedRuleSpec extends AnyWordSpec {
       assert(result.violations.last == AccountNotInitialized)
     }
     "not be triggered" in {
-      val rule = new AccountNotInitializedRule()
-
       val result: AccountState = rule.check(
         state = AccountState(Some(Account.create(true, 100)), List.empty),
         ptm = ProcessTransactionMessage(Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now()))
