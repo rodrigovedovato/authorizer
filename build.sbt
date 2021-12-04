@@ -12,8 +12,12 @@ lazy val root = (project in file("."))
         "io.circe" %% "circe-core" % "0.14.1",
         "io.circe" %% "circe-generic" % "0.14.1",
         "io.circe" %% "circe-generic-extras" % "0.14.1",
+        "io.circe" %% "circe-parser" % "0.14.1",
         "org.apache.commons" % "commons-lang3" % "3.12.0",
         scalaTest % Test
+    ),
+    scalacOptions ++= Seq(
+      "-Ymacro-annotations"
     )
   )
 

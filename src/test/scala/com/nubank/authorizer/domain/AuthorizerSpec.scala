@@ -1,7 +1,7 @@
 package com.nubank.authorizer.domain
 
-import com.nubank.authorizer.domain.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.domain.model.Authorization.{AccountAlreadyInitialized, AccountNotInitialized}
+import com.nubank.authorizer.domain.model.AuthorizerMessages.{CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.domain.model.{Account, Transaction}
 import com.nubank.authorizer.domain.repository.AccountRepository
 import com.nubank.authorizer.infrastructure.InMemoryAccountRepository
@@ -42,14 +42,20 @@ class AuthorizerSpec extends AnyWordSpec {
         assert(after.violations.last == AccountNotInitialized)
       }
       "process it and remove the amount from the account" in {
+        var updated = false
+
         val subject = new Authorizer(new AccountRepository {
           override def get: Option[Account] = Some(Account.create(true, 100))
           override def save(acc: Account): Either[repository.AccountConflict, Account] = ???
-          override def update(acc: Account): Either[repository.AccountNotFound.type, Account] = Right(acc)
+          override def update(acc: Account): Either[repository.AccountNotFound.type, Account] = {
+            updated = true
+            Right(acc)
+          }
         })
 
         val after = subject.authorize(ProcessTransactionMessage(model.Transaction(merchant = "The Blue Pub", amount = 20, time = OffsetDateTime.now())))
 
+        assert(updated)
         assert(after.account.availableLimit == 80)
         assert(after.violations.isEmpty)
       }

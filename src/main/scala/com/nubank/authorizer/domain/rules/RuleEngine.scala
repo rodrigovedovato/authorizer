@@ -1,7 +1,7 @@
 package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
 import com.nubank.authorizer.domain.model.Authorization
+import com.nubank.authorizer.domain.model.AuthorizerMessages.ProcessTransactionMessage
 
 object RuleEngine {
   private val rules = List(

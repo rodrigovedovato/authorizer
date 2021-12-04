@@ -1,9 +1,9 @@
 package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
 import com.nubank.authorizer.domain.Window.errors.{DuplicateAndOverflow, DuplicateEntry, InsertionError, WindowOverflow}
 import com.nubank.authorizer.domain.model.Authorization
 import com.nubank.authorizer.domain.model.Authorization.{DoubleTransaction, HighFrequencySmallInterval, Violation}
+import com.nubank.authorizer.domain.model.AuthorizerMessages.ProcessTransactionMessage
 
 class TransactionWindowRule extends BaseRule {
   private val errorToViolation: InsertionError => List[Violation] = {

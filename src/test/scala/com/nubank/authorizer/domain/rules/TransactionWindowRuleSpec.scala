@@ -1,8 +1,8 @@
 package com.nubank.authorizer.domain.rules
 
-import com.nubank.authorizer.domain.Authorizer.messages.ProcessTransactionMessage
 import com.nubank.authorizer.domain.model
 import com.nubank.authorizer.domain.model.Authorization.{DoubleTransaction, HighFrequencySmallInterval}
+import com.nubank.authorizer.domain.model.AuthorizerMessages.ProcessTransactionMessage
 import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
 import org.scalatest.wordspec.AnyWordSpec
 

@@ -1,8 +1,8 @@
 package com.nubank.authorizer.domain
 
 import com.nubank.authorizer.LanguageExtensions.EitherExtensions
-import com.nubank.authorizer.domain.Authorizer.messages.{CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.domain.model.Authorization.AccountNotInitialized
+import com.nubank.authorizer.domain.model.AuthorizerMessages.{CreateAccountMessage, ProcessTransactionMessage}
 import com.nubank.authorizer.domain.model.{Account, Authorization, Transaction}
 import com.nubank.authorizer.domain.repository.AccountRepository
 import com.nubank.authorizer.domain.rules.RuleEngine
@@ -21,6 +21,10 @@ class Authorizer(repository: AccountRepository) {
       }
     }
 
+    authorization.foreach { auth =>
+      repository.update(auth.account)
+    }
+
     authorization.getOrElse(Authorization(null, List(AccountNotInitialized)))
   }
 
@@ -31,13 +35,5 @@ class Authorizer(repository: AccountRepository) {
       .save(account)
       .leftMap(_.currentAccount)
       .fold(Authorization.alreadyInitialized, Authorization.newAccount)
-  }
-}
-
-object Authorizer {
-  object messages {
-    sealed trait AuthorizerMessage
-    final case class CreateAccountMessage(activeCard: Boolean, availableLimit: Int) extends AuthorizerMessage
-    final case class ProcessTransactionMessage(transaction: Transaction) extends AuthorizerMessage
   }
 }
