@@ -12,7 +12,7 @@ import com.nubank.authorizer.application.cli.model.json._
 
 class ProgramSpec extends AnyFunSuite {
   def readResource(name: String): List[String] = {
-    Files.readAllLines(Paths.get(ClassLoader.getSystemResource(name).toURI)).asScala.toList
+    Files.readAllLines(Paths.get(getClass.getClassLoader.getResource(name).toURI)).asScala.toList
   }
 
   def scenario(name: String): Assertion = {
